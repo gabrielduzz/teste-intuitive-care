@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import OperatorDetailsView from '../views/OperatorDetailsView.vue'
-import OperatorListView from '../views/OperatorListView.vue'
+import CompanyDetailsView from '../views/CompanyDetailsView.vue'
+import CompanyListView from '../views/CompanyListView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -8,12 +8,12 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: OperatorListView,
+      component: CompanyListView,
     },
     {
       path: '/operadora/:cnpj',
-      name: 'operator-details',
-      component: OperatorDetailsView,
+      name: 'Company-details',
+      component: CompanyDetailsView,
     },
   ],
 })

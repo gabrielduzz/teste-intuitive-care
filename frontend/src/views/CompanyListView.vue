@@ -77,7 +77,7 @@ onMounted(() => {
       </div>
 
       <div v-else class="table-container">
-        <table class="operator-table">
+        <table class="company-table">
           <thead>
             <tr>
               <th>Registro ANS</th>
@@ -96,7 +96,7 @@ onMounted(() => {
                 <span class="badge">{{ company.state }}</span>
               </td>
               <td>
-                <router-link :to="`/operadora/${company.ans_id}`" class="details-link">
+                <router-link :to="`/operadora/${company.cnpj}`" class="details-link">
                   Ver Detalhes
                 </router-link>
               </td>
@@ -174,20 +174,20 @@ onMounted(() => {
   border-radius: 8px;
 }
 
-.operator-table {
+.company-table {
   width: 100%;
   border-collapse: collapse;
   background: rgba(0, 0, 0, 0.1);
 }
 
-.operator-table th,
-.operator-table td {
+.company-table th,
+.company-table td {
   padding: 12px 15px;
   text-align: left;
   border-bottom: 1px solid #ddd;
 }
 
-.operator-table th {
+.company-table th {
   background-color: #343a40;
   color: white;
   text-transform: uppercase;
@@ -195,7 +195,7 @@ onMounted(() => {
   letter-spacing: 0.05em;
 }
 
-.operator-table tr:hover {
+.company-table tr:hover {
   background-color: #f1f1f1;
   color: #343a40;
 }

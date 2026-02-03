@@ -15,6 +15,14 @@ export interface AggregatedData {
     stddev_amount: number | null
 }
 
+export interface Expense {
+    id: number;
+    year: number;
+    quarter: number;
+    amount: number;
+    reference_date: string;
+}
+
 export interface MetaData {
     page: number;
     size: number;
