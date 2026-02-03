@@ -11,7 +11,7 @@ const router = createRouter({
       component: OperatorListView,
     },
     {
-      path: '/operadora/:id',
+      path: '/operadora/:cnpj',
       name: 'operator-details',
       component: OperatorDetailsView,
     },
