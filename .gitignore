@@ -15,4 +15,3 @@ yarn-error.log*
 postgres_data/
 
 .vscode/
-.idea/

@@ -3,7 +3,7 @@ from typing import List
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy import select, func, or_
 from sqlalchemy.orm import Session
-from backend.database import Base, get_db
+from backend.database import get_db
 from backend.models import CompanyModel, ExpenseModel, AggregatedDataModel
 from backend.schemas import CompanyList, CompanySchema, ExpenseSchema, AggregatedDataSchema
 from fastapi.middleware.cors import CORSMiddleware
