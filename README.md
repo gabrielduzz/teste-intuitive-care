@@ -98,7 +98,7 @@ Durante o desenvolvimento, precisei tomar algumas decisões de arquitetura. Abai
 
 ### 1\. Processamento de Dados (ETL)
 
-**Decisão:** Processamento em Memória (Pandas).
+**Decisão:** Processamento em memória com Pandas.
 
 **Por que?** O volume de dados trimestral da ANS, embora pareça grande em linhas, cabe tranquilamente na memória RAM de máquinas modernas. Usar Pandas permitiu escrever um código muito mais limpo e rápido de implementar do que criar um processamento incremental ou em stream, que seria "overengineering" para esse cenário.
     
