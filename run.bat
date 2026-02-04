@@ -20,23 +20,23 @@ echo --- INICIANDO PIPELINE DE DADOS (ETL) ---
 echo.
 
 echo [4/8] Etapa 1: Scraping de dados da ANS...
-python scraping.py
+python src\scraping.py
 if %errorlevel% neq 0 (
     echo [AVISO] Falha no download. Verifique sua internet ou o site da ANS.
     echo Tentando usar dados locais caso existam...
 )
 
 echo [5/8] Etapa 2: Processamento e Transformacao...
-python processing.py
-python transformation.py
-python join.py
+python src\processing.py
+python src\transformation.py
+python src\join.py
 
 echo [6/8] Etapa 3: Validacao e Agregacao...
-python validation.py
-python aggregation.py
+python src\validation.py
+python src\aggregation.py
 
 echo [7/8] Etapa 4: Importacao para o Banco de Dados...
-python import_data.py
+python src\import_data.py
 
 echo.
 echo ==========================================

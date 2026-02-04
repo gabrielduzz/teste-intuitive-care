@@ -46,7 +46,7 @@ for year in years:
     if(got_all_urls):
         break
 
-destination_dir = './data'
+destination_dir = './data/raw'
 os.makedirs(destination_dir, exist_ok=True)
 
 for zip_file_url in urls_to_download:
