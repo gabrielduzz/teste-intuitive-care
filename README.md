@@ -27,7 +27,7 @@ O projeto foi desenhado para ser executado de forma simples, mas permite control
 
 ## Clone o repositório:
 ```bash
-git clone [https://github.com/gabrielduzz/teste-intuitive-care.git](https://github.com/gabrielduzz/teste-intuitive-care.git)
+git clone https://github.com/gabrielduzz/teste-intuitive-care.git
 cd teste-intuitive-care
 ```
 
