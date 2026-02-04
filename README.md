@@ -30,46 +30,6 @@ Criei scripts de automação que configuram o ambiente, sobem o banco, instalam 
 **No Windows:**
 ```bash
 ./run.bat
-
-Aqui está a documentação completa e profissional para o seu README.md.
-
-Eu estruturei o documento para contar a "história" do projeto, destacando a facilidade de execução (DX), as decisões técnicas (Trade-offs) e os diferenciais, exatamente como o avaliador espera ver.
-
-Copie o código abaixo e cole no seu arquivo README.md.
-
-Markdown
-# Teste Técnico - Intuitive Care
-
-Aplicação Full Stack desenvolvida para monitoramento, análise e visualização de despesas de operadoras de planos de saúde, utilizando dados abertos da ANS.
-
-![Dashboard Preview](screenshots/dashboard.png)
-*(Certifique-se de que a imagem screenshots/dashboard.png existe no projeto)*
-
-## 📋 Sobre o Projeto
-
-Este projeto consiste em uma solução ponta-a-ponta (End-to-End) que realiza:
-1.  **ETL Automatizado:** Scraping, limpeza, transformação e validação de dados da ANS.
-2.  **API RESTful:** Backend performático para servir dados paginados e estatísticas.
-3.  **Dashboard Interativo:** Frontend moderno para visualização de indicadores e histórico financeiro.
-
----
-
-## 🚀 Como Executar
-
-O projeto foi desenhado para ser executado de forma simples, mas permite controle granular se necessário.
-
-### Pré-requisitos
-- **Docker & Docker Compose** (Essencial para o Banco de Dados)
-- **Python 3.10+**
-- **Node.js 18+**
-
-### Opção A: Execução Automática (Recomendada) ⚡
-
-Criei scripts de automação que configuram o ambiente, sobem o banco, instalam dependências e rodam o pipeline de dados completo.
-
-**No Windows:**
-```bash
-./run.bat
 No Linux/Mac:
 
 ```bash
@@ -176,6 +136,7 @@ Criei scripts de automação que configuram o ambiente, sobem o banco, instalam 
 ```bash
 ./run.bat
 No Linux/Mac:
+
 
 Bash
 chmod +x run.sh
