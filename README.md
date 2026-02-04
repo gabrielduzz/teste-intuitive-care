@@ -61,7 +61,8 @@ Ele automatiza o setup para você não perder tempo:
 Em um terminal separado:
 
 ```bash
-  # Suba o servidor  uvicorn backend.main:app --reload
+# Suba o servidor
+uvicorn backend.main:app --reload
 ```
 
 *   **API:** http://localhost:8000
@@ -73,7 +74,9 @@ Em um terminal separado:
 
 Em outro terminal:
 ```bash
-cd frontend  npm install  npm run dev
+cd frontend
+npm install
+npm run dev
 ```
 
 *   **Dashboard:** http://localhost:5173
