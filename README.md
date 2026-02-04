@@ -44,7 +44,8 @@ Criei scripts de automação que configuram o ambiente, sobem o banco, instalam 
 chmod +x run.sh
 ./run.sh   
 ```
-**O que esse script faz?**Ele automatiza o setup para você não perder tempo:
+**O que esse script faz?**
+Ele automatiza o setup para você não perder tempo:
 
 1.  Limpa volumes antigos do Docker (pra garantir que não tenha lixo de execuções anteriores).
     
