@@ -50,7 +50,7 @@ chmod +x run.sh
 **O que esse script faz?**
 Ele automatiza o setup para você não perder tempo:
 
-1.  Limpa volumes antigos do Docker (pra garantir que não tenha lixo de execuções anteriores).
+1.  Limpa volumes antigos do Docker, pra garantir que não tenha lixo de execuções anteriores.
     
 2.  Sobe o container do PostgreSQL.
     
@@ -87,7 +87,7 @@ npm run dev
 
 ### ⚠️ Nota sobre os Dados (Backup de Segurança)
 
-O script tenta baixar os dados direto do site da ANS em tempo real. Mas a gente sabe que sites do governo às vezes ficam instáveis ou lentos.
+O script tenta baixar os dados direto do site da ANS em tempo real. Mas sabemos que sites do governo às vezes ficam instáveis ou lentos.
 
 **Plano B:** Já deixei os arquivos .csv processados e prontos na pasta data/processed.Se o script de scraping falhar por conexão, o sistema é inteligente o suficiente para usar esses arquivos locais. Assim você consegue testar a aplicação sem ficar travado esperando download.
 
@@ -100,56 +100,70 @@ Durante o desenvolvimento, precisei tomar algumas decisões de arquitetura. Abai
 
 **Decisão:** Processamento em Memória (Pandas).
 
-*   **Por que?** O volume de dados trimestral da ANS, embora pareça grande em linhas, cabe tranquilamente na memória RAM de máquinas modernas. Usar Pandas permitiu escrever um código muito mais limpo e rápido de implementar do que criar um processamento incremental ou em stream, que seria "overengineering" para esse cenário.
+**Por que?** O volume de dados trimestral da ANS, embora pareça grande em linhas, cabe tranquilamente na memória RAM de máquinas modernas. Usar Pandas permitiu escrever um código muito mais limpo e rápido de implementar do que criar um processamento incremental ou em stream, que seria "overengineering" para esse cenário.
     
 
 ### 2\. Tratamento de Dados Inválidos
 
-**Decisão:** Limpeza e Padronização.
+**Decisão:** Rotulagem em vez de Remoção.
 
-*   **Por que?** Em vez de descartar qualquer linha com erro, optei por tentar salvar o dado. Para CNPJs, removi caracteres não numéricos e garanti o _padding_ com zeros à esquerda. Se mesmo assim o dado for inválido, ele é mantido para fins de auditoria, mas não entra nas métricas financeiras críticas.
-    
+**Por que?** Em vez de descartar qualquer linha com erro, optei por tentar optei por criar colunas booleanas como CNPJ_Valido, Nome_Valido e Valor_Valido. Isso garante a auditabilidade completa (sabemos exatamente o que veio da fonte). Permite que o analista de negócios ou o dashboard final decida se quer excluir ou investigar esses registros.
 
-### 3\. Banco de Dados: Normalização
+
+### 3\. Estratégia de Join
+
+**Decisão:** Left Join usando Pandas em memória.
+
+**Por que?** Usando a coluna RegistroANS como chave de ligação, mantive todos os registros de despesas. Se uma operadora não for encontrada no cadastro, as colunas de metadados (Razão Social, UF) ficam nulas, mas o dado financeiro é preservado. Dado o volume de dados, milhares de linhas, o processamento em memória com Pandas é a solução mais eficiente e simples, evitando a complexidade desnecessária de outros frameworks para esta etapa.
+
+
+### 4\. Estratégia de Agregação
+
+**Decisão:** Agrupamento por Razao_Social e UF.
+
+**Por que?** A ordenação foi feita implicitamente pelas chaves de agrupamento, alfabética por Razão Social.
+
+
+### 5\. Banco de Dados: Normalização
 
 **Decisão:** Tabelas Normalizadas (dim\_companies e fact\_expenses).
 
-*   **Por que?** Poderia ter feito uma tabela única (plana), mas optei por separar. A dimensão de empresas (dim\_companies) evita que a gente repita a Razão Social e UF milhões de vezes na tabela de despesas, economizando espaço e facilitando a atualização cadastral se a empresa mudar de nome.
-    
+**Por que?** Poderia ter feito uma tabela única , mas optei por separar. A dimensão de empresas evita quera Razão Social e UF sejam repetidas várias vezes na tabela de despesas, economizando espaço e facilitando a atualização cadastral se a empresa mudar de nome.
 
-### 4\. Banco de Dados: Tipos Numéricos
+    
+### 6\. Banco de Dados: Tipos Numéricos
 
 **Decisão:** DECIMAL/NUMERIC ao invés de FLOAT.
 
-*   **Por que?** Regra de ouro em sistemas financeiros: nunca use Float para dinheiro por causa de erros de arredondamento de ponto flutuante. Usei DECIMAL para garantir precisão exata nos centavos.
+**Por que?** É importante nunca usar Float para dinheiro por causa de erros de arredondamento de ponto flutuante. Usei DECIMAL para garantir precisão exata nos centavos.
     
 
-### 5\. Backend: Framework
+### 7\. Backend: Framework
 
 **Decisão:** FastAPI.
 
-*   **Por que?** É mais performático que o Flask (assíncrono nativo) e a melhor parte: ele já me dá a documentação Swagger de graça e valida os dados de entrada/saída com o Pydantic. Isso poupou muito tempo de validação manual de JSON.
+*   **Por que?** É mais performático que o Flask, pois é assíncrono nativo, e já me dá a documentação Swagger de graça e valida os dados de entrada/saída com o Pydantic. Isso poupou muito tempo de validação manual de JSON.
     
 
-### 6\. Estratégia de Paginação
+### 8\. Estratégia de Paginação
 
-**Decisão:** Offset-based (LIMIT/OFFSET).
+**Decisão:** Offset-based.
 
-*   **Por que?** Num dashboard administrativo, o usuário quer saber "quantas páginas tem" e poder pular da página 1 para a 10. Paginação por cursor (como em redes sociais) é mais rápida para volumes gigantes, mas ruim para navegação e tabelas clássicas. Com os índices que criei no banco, o Offset funciona super bem aqui.
+*   **Por que?** Num dashboard administrativo, o usuário quer saber "quantas páginas tem" e poder pular da página 1 para a 10. Paginação por cursor é mais rápida para volumes gigantes, mas ruim para navegação e tabelas clássicas. Com os índices que criei no banco, o Offset funciona muito bem aqui.
     
 
-### 7\. Frontend: Busca
+### 9\. Frontend: Busca
 
-**Decisão:** Busca no Servidor (Server-side).
+**Decisão:** Busca no Servidor.
 
-*   **Por que?** Carregar todas as operadoras no navegador do cliente pesaria demais a página inicial. Fazendo a busca no servidor (usando ILIKE no SQL), transferimos o peso do processamento para o banco, que é feito pra isso, deixando o front leve e rápido.
+*   **Por que?** Carregar todas as operadoras no navegador do cliente pesaria demais a página inicial. Fazendo a busca no servidor usando ILIKE no SQL, transferimos o peso do processamento para o banco, que é feito pra isso, deixando o front leve e rápido.
     
 
-### 8\. Frontend: Estado
+### 10\. Frontend: Estado
 
-**Decisão:** Composition API & Refs (Simples).
+**Decisão:** Composition API & Refs.
 
-*   **Por que?** Não usei Pinia ou Vuex porque não precisava. O estado da aplicação é local (apenas a lista da tela atual ou os detalhes da empresa). Usar uma lib de gerenciamento de estado global só adicionaria complexidade desnecessária (boilerplate) sem ganho real. Mantive o princípio KISS (_Keep It Simple, Stupid_).
+*   **Por que?** Não usei Pinia ou Vuex porque não precisava. O estado da aplicação é local (apenas a lista da tela atual ou os detalhes da empresa). Usar uma lib de gerenciamento de estado global só adicionaria complexidade desnecessária sem ganho real. Mantive o princípio KISS (_Keep It Simple, Stupid_).
     
 
 🌟 Diferenciais
@@ -157,13 +171,13 @@ Durante o desenvolvimento, precisei tomar algumas decisões de arquitetura. Abai
 
 Além do básico funcional, implementei alguns pontos extras para garantir qualidade:
 
-*   **Arquitetura Limpa:** O Backend não é um "arquivo linguiça". Separei rotas, models e conexão com banco. O Frontend também está componentizado.
+*   **Arquitetura Limpa:** Separei rotas, models e conexão com banco. O Frontend também está componentizado.
     
 *   **Performance:**
     
-    *   No Frontend, uso Promise.all para disparar requisições em paralelo (dados da empresa + despesas), carregando a tela de detalhes na metade do tempo.
+    *   No Frontend, uso Promise.all para disparar requisições de dados da empresa e despesas em paralelo, carregando a tela de detalhes na metade do tempo.
         
-    *   No Banco, criei índices específicos para as colunas que a gente mais busca (CNPJ e Datas).
+    *   No Banco, criei índices específicos para as colunas com mais busca, como o CNPJ.
         
 *   **UX/UI:** O layout é responsivo, tem feedback visual de "Carregando..." e trata erros de forma amigável, sem estourar código na cara do usuário.
     
@@ -174,10 +188,11 @@ Além do básico funcional, implementei alguns pontos extras para garantir quali
 
 - **`backend/`**: Código fonte da API construída com FastAPI, incluindo modelos, esquemas e regras de negócio.
 - **`frontend/`**: Aplicação cliente desenvolvida em Vue.js, contendo componentes, views e serviços.
-- **`data/`**: Diretório reservado para os arquivos .csv e .zip (brutos e processados) utilizados pelo ETL.
+- **`data/`**: Diretório reservado para os arquivos .csv e .zip, brutos e processados, utilizados pelo ETL.
 - **`src/`**: Scripts Python responsáveis por todo o ciclo de vida dos dados.
 - **`docker-compose.yml`**: Arquivo de configuração para subir o banco de dados PostgreSQL containerizado.
 - **`run.bat / run.sh`**: Scripts de conveniência para configurar e rodar o projeto inteiro com um único comando.
+  
 
 ## 🔎 Queries Analíticas (SQL)
 
