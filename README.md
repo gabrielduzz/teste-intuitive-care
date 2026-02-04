@@ -169,15 +169,28 @@ Além do básico funcional, implementei alguns pontos extras para garantir quali
 
 ## 📂 Estrutura do Projeto
 
-```text
+``text
 teste-intuitive-care/
 ├── 📂 backend/            # API RESTful (FastAPI + SQLAlchemy)
 ├── 📂 frontend/           # Dashboard Interativo (Vue.js 3 + TypeScript)
 ├── 📂 data/               # Armazenamento de dados (Raw & Processed)
+├── 📂 sql/                # Queries Analíticas (Respostas da Etapa 3.4)  <-- ADICIONADO
 ├── 📂 src/                # Scripts do Pipeline ETL (Scraping, Validação, Agregação)
 ├── 🐳 docker-compose.yml  # Orquestração do Banco de Dados (PostgreSQL)
 └── 🚀 run.bat / run.sh    # Scripts de Automação ("One-click setup")
 ```
+
+## 🔎 Queries Analíticas (SQL)
+
+As consultas SQL solicitadas na **Etapa 3.4** foram desenvolvidas e salvas separadamente para facilitar a revisão.
+
+* **Localização:** Pasta `sql/`
+* **Como testar:** Você pode abrir os arquivos .sql em qualquer cliente de banco de dados (pgAdmin, DBeaver, Datagrip) conectado ao banco do projeto.
+
+**Conteúdo dos Arquivos:**
+1.  **Top 5 Crescimento:** Operadoras que mais cresceram entre trimestres.
+2.  **Despesas por UF:** Distribuição geográfica e média por estado.
+3.  **Despesas Acima da Média:** Operadoras que superaram a média geral.
 
 📬 Postman
 ----------
