@@ -2,7 +2,10 @@
 
 Aplicação Full Stack desenvolvida para monitoramento, análise e visualização de despesas de operadoras de planos de saúde, utilizando dados abertos da ANS.
 
-![Dashboard Preview](screenshots/home.png)
+![Home_Preview](screenshots/home.png)
+![Graph_Preview](screenshots/graph.png)
+![Company_Preview](screenshots/company.png)
+![Expenses_Preview](screenshots/expenses.png)
 
 ## 📋 Sobre o Projeto
 
@@ -18,7 +21,7 @@ Este projeto consiste em uma solução ponta-a-ponta (End-to-End) que realiza:
 O projeto foi desenhado para ser executado de forma simples, mas permite controle granular se necessário.
 
 ### Pré-requisitos
-- **Docker & Docker Compose** (Essencial para o Banco de Dados)
+- **Docker e Docker Compose**
 - **Python 3.10+**
 - **Node.js 18+**
 
