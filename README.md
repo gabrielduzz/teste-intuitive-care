@@ -40,107 +40,143 @@ Criei scripts de automação que configuram o ambiente, sobem o banco, instalam 
 ./run.bat
 ```
 
-No Linux/Mac:
-
+### 🐧 No Linux/Mac
 ```bash
 chmod +x run.sh
-./run.sh
+./run.sh   
 ```
-O script irá:
+**O que esse script faz?**Ele automatiza o setup para você não perder tempo:
 
-Limpar volumes antigos do Docker (para evitar duplicação).
+1.  Limpa volumes antigos do Docker (pra garantir que não tenha lixo de execuções anteriores).
+    
+2.  Sobe o container do PostgreSQL.
+    
+3.  Roda o pipeline completo de ETL (scraping -> processamento -> importação pro banco).
+    
+4.  Te avisa quando terminar.
+    
 
-Subir o PostgreSQL.
+### 🐍 Preparando o Backend
 
-Executar o Pipeline ETL (scraping -> processing -> db import).
-
-Exibir os comandos finais para rodar o servidor e o frontend.
-
-Prepare o ambiente Python:
+Em um terminal separado:
 
 ```bash
-uvicorn backend.main:app --reload
+  # Suba o servidor  uvicorn backend.main:app --reload
 ```
-A API estará disponível em: http://localhost:8000 Documentação Swagger: http://localhost:8000/docs
 
-3. Frontend
-Em um novo terminal, inicie a interface:
+*   **API:** http://localhost:8000
+    
+*   **Docs (Swagger):** http://localhost:8000/docs
+    
 
+### 🎨 Iniciando o Frontend
+
+Em outro terminal:
 ```bash
-cd frontend
-npm install
-npm run dev
+cd frontend  npm install  npm run dev
 ```
-O Dashboard estará disponível em: http://localhost:5173
 
-⚠️ Nota sobre os Dados (Backup)
-O pipeline de dados conecta-se em tempo real ao site da ANS. Como serviços governamentais podem apresentar instabilidade:
+*   **Dashboard:** http://localhost:5173
+    
 
-Backup Incluído: O projeto já contém os arquivos .csv processados na pasta data/processed.
+### ⚠️ Nota sobre os Dados (Backup de Segurança)
 
-Contingência: Se o script de scraping falhar, o sistema é capaz de prosseguir a importação utilizando esses arquivos locais, garantindo que o avaliador consiga testar a aplicação sem bloqueios.
+O script tenta baixar os dados direto do site da ANS em tempo real. Mas a gente sabe que sites do governo às vezes ficam instáveis ou lentos.
+
+**Plano B:** Já deixei os arquivos .csv processados e prontos na pasta data/processed.Se o script de scraping falhar por conexão, o sistema é inteligente o suficiente para usar esses arquivos locais. Assim você consegue testar a aplicação sem ficar travado esperando download.
 
 ⚖️ Trade-offs e Decisões Técnicas
-Conforme solicitado, abaixo justifico as decisões arquiteturais tomadas durante o desenvolvimento.
+---------------------------------
 
-1. Backend: Framework
-Escolha: FastAPI (Opção B)
+Durante o desenvolvimento, precisei tomar algumas decisões de arquitetura. Abaixo explico o porquê de cada escolha, focando no contexto do teste e boas práticas.
 
-Justificativa: Em comparação ao Flask, o FastAPI oferece performance superior (ASGI) e validação de dados nativa via Pydantic. A geração automática da documentação (Swagger UI) acelera o desenvolvimento e facilita a auditoria da API, reduzindo a necessidade de escrever documentação manual para cada rota.
+### 1\. Processamento de Dados (ETL)
 
-2. Banco de Dados: Estratégia de Paginação
-Escolha: Offset-based (Opção A)
+**Decisão:** Processamento em Memória (Pandas).
 
-Justificativa: O requisito de negócio (Dashboard) implica que o usuário pode querer navegar para páginas específicas ou ver o total de registros. A paginação baseada em cursor (Cursor-based) é excelente para scroll infinito, mas dificulta o "salto" de páginas. Com índices adequados no banco, o Offset atende perfeitamente ao volume de dados proposto.
+*   **Por que?** O volume de dados trimestral da ANS, embora pareça grande em linhas, cabe tranquilamente na memória RAM de máquinas modernas. Usar Pandas permitiu escrever um código muito mais limpo e rápido de implementar do que criar um processamento incremental ou em stream, que seria "overengineering" para esse cenário.
+    
 
-3. API: Cache vs Real-time
-Escolha: Queries Diretas Otimizadas (Opção A)
+### 2\. Tratamento de Dados Inválidos
 
-Justificativa: A periodicidade de atualização dos dados da ANS é trimestral. Implementar cache (como Redis) adicionaria complexidade de infraestrutura para dados que são essencialmente estáticos. A otimização foi feita no nível do banco de dados, criando índices compostos (CREATE INDEX) para garantir respostas em milissegundos.
+**Decisão:** Limpeza e Padronização.
 
-4. Frontend: Busca e Filtragem
-Escolha: Busca no Servidor (Opção A)
+*   **Por que?** Em vez de descartar qualquer linha com erro, optei por tentar salvar o dado. Para CNPJs, removi caracteres não numéricos e garanti o _padding_ com zeros à esquerda. Se mesmo assim o dado for inválido, ele é mantido para fins de auditoria, mas não entra nas métricas financeiras críticas.
+    
 
-Justificativa: Embora o dataset de teste seja pequeno, uma aplicação real de operadoras conteria milhares de registros. Carregar tudo no cliente (Client-side) prejudicaria o "Time to Interactive" e o consumo de memória do navegador. A busca no servidor (Server-side search) com filtros SQL ILIKE é a solução escalável.
+### 3\. Banco de Dados: Normalização
 
-5. Frontend: Gerenciamento de Estado
-Escolha: Composition API & Refs (Opção C)
+**Decisão:** Tabelas Normalizadas (dim\_companies e fact\_expenses).
 
-Justificativa: A aplicação possui escopo bem definido e não apresenta complexidade de compartilhamento de estado global profundo que justificasse o uso de Pinia ou Vuex. O uso de refs e composables nativos do Vue 3 mantém o código mais limpo (KISS - Keep It Simple, Stupid) e facilita a manutenção.
+*   **Por que?** Poderia ter feito uma tabela única (plana), mas optei por separar. A dimensão de empresas (dim\_companies) evita que a gente repita a Razão Social e UF milhões de vezes na tabela de despesas, economizando espaço e facilitando a atualização cadastral se a empresa mudar de nome.
+    
 
-🌟 Diferenciais Implementados
-Além dos requisitos obrigatórios, o projeto conta com:
+### 4\. Banco de Dados: Tipos Numéricos
 
-Arquitetura Limpa: Separação clara de responsabilidades. Backend organizado em camadas (Router, Controller, Service, Model) e Frontend componentizado.
+**Decisão:** DECIMAL/NUMERIC ao invés de FLOAT.
 
-Performance:
+*   **Por que?** Regra de ouro em sistemas financeiros: nunca use Float para dinheiro por causa de erros de arredondamento de ponto flutuante. Usei DECIMAL para garantir precisão exata nos centavos.
+    
 
-Uso de Promise.all no frontend para carregamento paralelo de dados.
+### 5\. Backend: Framework
 
-Índices no PostgreSQL para otimizar queries de agregação.
+**Decisão:** FastAPI.
 
-UX/UI Polida:
+*   **Por que?** É mais performático que o Flask (assíncrono nativo) e a melhor parte: ele já me dá a documentação Swagger de graça e valida os dados de entrada/saída com o Pydantic. Isso poupou muito tempo de validação manual de JSON.
+    
 
-Interface moderna e responsiva.
+### 6\. Estratégia de Paginação
 
-Tratamento de erros amigável (Feedback visual ao usuário).
+**Decisão:** Offset-based (LIMIT/OFFSET).
 
-Formatação inteligente de valores monetários e datas.
+*   **Por que?** Num dashboard administrativo, o usuário quer saber "quantas páginas tem" e poder pular da página 1 para a 10. Paginação por cursor (como em redes sociais) é mais rápida para volumes gigantes, mas ruim para navegação e tabelas clássicas. Com os índices que criei no banco, o Offset funciona super bem aqui.
+    
 
-Resiliência: O script de ETL possui tratamento de falhas (try/except) e fallback para arquivos locais.
+### 7\. Frontend: Busca
 
-📂 Estrutura do Projeto
-Plaintext
+**Decisão:** Busca no Servidor (Server-side).
+
+*   **Por que?** Carregar todas as operadoras no navegador do cliente pesaria demais a página inicial. Fazendo a busca no servidor (usando ILIKE no SQL), transferimos o peso do processamento para o banco, que é feito pra isso, deixando o front leve e rápido.
+    
+
+### 8\. Frontend: Estado
+
+**Decisão:** Composition API & Refs (Simples).
+
+*   **Por que?** Não usei Pinia ou Vuex porque não precisava. O estado da aplicação é local (apenas a lista da tela atual ou os detalhes da empresa). Usar uma lib de gerenciamento de estado global só adicionaria complexidade desnecessária (boilerplate) sem ganho real. Mantive o princípio KISS (_Keep It Simple, Stupid_).
+    
+
+🌟 Diferenciais
+---------------
+
+Além do básico funcional, implementei alguns pontos extras para garantir qualidade:
+
+*   **Arquitetura Limpa:** O Backend não é um "arquivo linguiça". Separei rotas, models e conexão com banco. O Frontend também está componentizado.
+    
+*   **Performance:**
+    
+    *   No Frontend, uso Promise.all para disparar requisições em paralelo (dados da empresa + despesas), carregando a tela de detalhes na metade do tempo.
+        
+    *   No Banco, criei índices específicos para as colunas que a gente mais busca (CNPJ e Datas).
+        
+*   **UX/UI:** O layout é responsivo, tem feedback visual de "Carregando..." e trata erros de forma amigável, sem estourar código na cara do usuário.
+    
+*   **Resiliência:** O script de ETL tem try/except robusto. Se um arquivo falhar, ele avisa e tenta continuar o resto, em vez de quebrar o processo todo.
+    
+
+## 📂 Estrutura do Projeto
+
+```text
 teste-intuitive-care/
-├── backend/            # API FastAPI
-│ 
-├── frontend/           # Aplicação Vue.js
+├── 📂 backend/            # API RESTful (FastAPI + SQLAlchemy)
+├── 📂 frontend/           # Dashboard Interativo (Vue.js 3 + TypeScript)
+├── 📂 data/               # Armazenamento de dados (Raw & Processed)
+├── 📂 src/                # Scripts do Pipeline ETL (Scraping, Validação, Agregação)
+├── 🐳 docker-compose.yml  # Orquestração do Banco de Dados (PostgreSQL)
+└── 🚀 run.bat / run.sh    # Scripts de Automação ("One-click setup")
+```
 
-├── data/               # Arquivos CSV/ZIP 
-├── sql/                # Queries SQL
-├── src/                # Scripts de ETL 
-├── run.bat / run.sh    # Scripts de Automação
-└── docker-compose.yml  # Infraestrutura
+📬 Postman
+----------
 
-📬 Coleção Postman
-O arquivo collection.json na raiz do projeto contém a coleção completa para testes da API.
+Deixei um arquivo collection.json na raiz. É só importar no Postman que todas as rotas já estão configuradas para teste.
