@@ -1,26 +1,63 @@
 import math
 from typing import List
 from fastapi import FastAPI, Depends, HTTPException
-from sqlalchemy import select, func
+from sqlalchemy import select, func, or_
 from sqlalchemy.orm import Session
 from backend.database import Base, get_db
 from backend.models import CompanyModel, ExpenseModel, AggregatedDataModel
 from backend.schemas import CompanyList, CompanySchema, ExpenseSchema, AggregatedDataSchema
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
+origins = [
+    "http://localhost:5173", 
+    "http://127.0.0.1:5173",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"], 
+    allow_headers=["*"], 
+)
+
 @app.get("/api/operadoras", response_model=CompanyList)
-def get_companies(page: int = 1, size: int = 10, db: Session = Depends(get_db)):
+def get_companies(
+    page: int = 1, 
+    size: int = 10, 
+    search: str | None = None, 
+    db: Session = Depends(get_db)
+):
     skip = (page - 1) * size
 
-    select_statement = select(CompanyModel).offset(skip).limit(size)
+    query = select(CompanyModel)
 
-    companies = db.execute(select_statement).scalars().all()
+    if search:
+        query = query.where(
+            or_(
+                CompanyModel.cnpj.ilike(f"%{search}%"),
+                CompanyModel.company_name.ilike(f"%{search}%")
+            )
+        )
 
-    count_statement = select(func.count(CompanyModel.ans_id))
+    count_query = select(func.count(CompanyModel.ans_id))
+    if search:
+         count_query = count_query.where(
+            or_(
+                CompanyModel.cnpj.ilike(f"%{search}%"),
+                CompanyModel.company_name.ilike(f"%{search}%")
+            )
+        )
+    
+    total_records = db.scalar(count_query)
 
-    total_records = db.scalar(count_statement)
+    query = query.offset(skip).limit(size)
+    companies = db.execute(query).scalars().all()
+
     total_pages = math.ceil(total_records / size) if total_records > 0 else 0
+    
     return {
         "data" : companies,
         "meta" : {
@@ -32,7 +69,7 @@ def get_companies(page: int = 1, size: int = 10, db: Session = Depends(get_db)):
     }
 
 @app.get("/api/operadoras/{cnpj}", response_model=CompanySchema)
-def get_company(cnpj: str, db: Session = Depends(get_db)):
+def get_company_by_cnpj(cnpj: str, db: Session = Depends(get_db)):
     statement = select(CompanyModel).where(CompanyModel.cnpj == cnpj)
 
     company = db.execute(statement).scalar_one_or_none()
