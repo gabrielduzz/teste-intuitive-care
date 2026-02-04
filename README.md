@@ -170,18 +170,14 @@ Além do básico funcional, implementei alguns pontos extras para garantir quali
 *   **Resiliência:** O script de ETL tem try/except robusto. Se um arquivo falhar, ele avisa e tenta continuar o resto, em vez de quebrar o processo todo.
     
 
-## 📂 Estrutura do Projeto
+### 📂 Estrutura do Projeto
 
-``text
-teste-intuitive-care/
-├── 📂 backend/            # API RESTful 
-├── 📂 frontend/           # Dashboard Interativo
-├── 📂 data/               # Armazenamento de dados 
-├── 📂 sql/                # Queries Analíticas
-├── 📂 src/                # Scripts do Pipeline ETL
-├── 🐳 docker-compose.yml  # Orquestração do Banco de Dados 
-└── 🚀 run.bat / run.sh    # Scripts de Automação 
-```
+- **`backend/`**: Código fonte da API construída com FastAPI, incluindo modelos, esquemas e regras de negócio.
+- **`frontend/`**: Aplicação cliente desenvolvida em Vue.js, contendo componentes, views e serviços.
+- **`data/`**: Diretório reservado para os arquivos .csv e .zip (brutos e processados) utilizados pelo ETL.
+- **`src/`**: Scripts Python responsáveis por todo o ciclo de vida dos dados.
+- **`docker-compose.yml`**: Arquivo de configuração para subir o banco de dados PostgreSQL containerizado.
+- **`run.bat / run.sh`**: Scripts de conveniência para configurar e rodar o projeto inteiro com um único comando.
 
 ## 🔎 Queries Analíticas (SQL)
 
@@ -194,7 +190,7 @@ As consultas SQL solicitadas na **Etapa 3.4** foram desenvolvidas e salvas separ
 1.  **Top 5 Crescimento:** Operadoras que mais cresceram entre trimestres.
 2.  **Despesas por UF:** Distribuição geográfica e média por estado.
 3.  **Despesas Acima da Média:** Operadoras que superaram a média geral.
-```
+
 
 📬 Postman
 ----------
