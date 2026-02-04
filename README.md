@@ -25,6 +25,11 @@ O projeto foi desenhado para ser executado de forma simples, mas permite control
 - **Python 3.10+**
 - **Node.js 18+**
 
+## Clone o repositório:
+```bash
+git clone [https://github.com/gabrielduzz/teste-intuitive-care.git](https://github.com/gabrielduzz/teste-intuitive-care.git)
+cd teste-intuitive-care
+```
 
 ## Crie e ative o ambiente virtual
 ```bash
@@ -33,11 +38,11 @@ python -m venv venv
 # Linux/Mac: source venv/bin/activate
 ```
 
-### Execução Automática ⚡
+## Execução Automática ⚡
 
 Criei scripts de automação que configuram o ambiente, sobem o banco, instalam dependências e rodam o pipeline de dados completo.
 
-**No Windows:**
+### No Windows: 
 ```bash
 ./run.bat
 ```
