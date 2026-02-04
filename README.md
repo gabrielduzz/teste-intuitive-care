@@ -133,7 +133,7 @@ Durante o desenvolvimento, precisei tomar algumas decisões de arquitetura. Abai
     
 ### 6\. Banco de Dados: Tipos Numéricos
 
-**Decisão:** DECIMAL/NUMERIC ao invés de FLOAT.
+**Decisão:** DECIMAL ao invés de FLOAT.
 
 **Por que?** É importante nunca usar Float para dinheiro por causa de erros de arredondamento de ponto flutuante. Usei DECIMAL para garantir precisão exata nos centavos.
     
