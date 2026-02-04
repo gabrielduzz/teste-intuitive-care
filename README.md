@@ -26,7 +26,7 @@ O projeto foi desenhado para ser executado de forma simples, mas permite control
 - **Node.js 18+**
 
 
-# Crie e ative o ambiente virtual
+## Crie e ative o ambiente virtual
 ```bash
 python -m venv venv
 # Windows: venv\Scripts\activate
