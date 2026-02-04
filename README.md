@@ -2,7 +2,7 @@
 
 Aplicação Full Stack desenvolvida para monitoramento, análise e visualização de despesas de operadoras de planos de saúde, utilizando dados abertos da ANS.
 
-![Dashboard Preview](screenshots/dashboard.png)
+![Dashboard Preview](screenshots/home.png)
 
 ## 📋 Sobre o Projeto
 
