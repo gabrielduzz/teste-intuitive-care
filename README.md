@@ -85,11 +85,11 @@ npm run dev
 *   **Dashboard:** http://localhost:5173
     
 
-### ⚠️ Nota sobre os Dados (Backup de Segurança)
+### ⚠️ Nota sobre os Dados
 
 O script tenta baixar os dados direto do site da ANS em tempo real. Mas sabemos que sites do governo às vezes ficam instáveis ou lentos.
 
-**Plano B:** Já deixei os arquivos .csv processados e prontos na pasta data/processed.Se o script de scraping falhar por conexão, o sistema é inteligente o suficiente para usar esses arquivos locais. Assim você consegue testar a aplicação sem ficar travado esperando download.
+Como Plano B, já deixei os arquivos .csv processados e prontos na pasta data/processed.Se o script de scraping falhar por conexão, o sistema é inteligente o suficiente para usar esses arquivos locais. Assim você consegue testar a aplicação sem ficar travado esperando download.
 
 ⚖️ Trade-offs e Decisões Técnicas
 ---------------------------------
@@ -142,28 +142,28 @@ Durante o desenvolvimento, precisei tomar algumas decisões de arquitetura. Abai
 
 **Decisão:** FastAPI.
 
-*   **Por que?** É mais performático que o Flask, pois é assíncrono nativo, e já me dá a documentação Swagger de graça e valida os dados de entrada/saída com o Pydantic. Isso poupou muito tempo de validação manual de JSON.
+**Por que?** É mais performático que o Flask, pois é assíncrono nativo, e já me dá a documentação Swagger de graça e valida os dados de entrada/saída com o Pydantic. Isso poupou muito tempo de validação manual de JSON.
     
 
 ### 8\. Estratégia de Paginação
 
 **Decisão:** Offset-based.
 
-*   **Por que?** Num dashboard administrativo, o usuário quer saber "quantas páginas tem" e poder pular da página 1 para a 10. Paginação por cursor é mais rápida para volumes gigantes, mas ruim para navegação e tabelas clássicas. Com os índices que criei no banco, o Offset funciona muito bem aqui.
+**Por que?** Num dashboard administrativo, o usuário quer saber "quantas páginas tem" e poder pular da página 1 para a 10. Paginação por cursor é mais rápida para volumes gigantes, mas ruim para navegação e tabelas clássicas. Com os índices que criei no banco, o Offset funciona muito bem aqui.
     
 
 ### 9\. Frontend: Busca
 
 **Decisão:** Busca no Servidor.
 
-*   **Por que?** Carregar todas as operadoras no navegador do cliente pesaria demais a página inicial. Fazendo a busca no servidor usando ILIKE no SQL, transferimos o peso do processamento para o banco, que é feito pra isso, deixando o front leve e rápido.
+**Por que?** Carregar todas as operadoras no navegador do cliente pesaria demais a página inicial. Fazendo a busca no servidor usando ILIKE no SQL, transferimos o peso do processamento para o banco, que é feito pra isso, deixando o front leve e rápido.
     
 
 ### 10\. Frontend: Estado
 
 **Decisão:** Composition API & Refs.
 
-*   **Por que?** Não usei Pinia ou Vuex porque não precisava. O estado da aplicação é local (apenas a lista da tela atual ou os detalhes da empresa). Usar uma lib de gerenciamento de estado global só adicionaria complexidade desnecessária sem ganho real. Mantive o princípio KISS (_Keep It Simple, Stupid_).
+**Por que?** Não usei Pinia ou Vuex porque não precisava. O estado da aplicação é local (apenas a lista da tela atual ou os detalhes da empresa). Usar uma lib de gerenciamento de estado global só adicionaria complexidade desnecessária sem ganho real. Mantive o princípio KISS (_Keep It Simple, Stupid_).
     
 
 🌟 Diferenciais
