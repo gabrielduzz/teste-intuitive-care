@@ -62,7 +62,43 @@ Ele automatiza o setup para você não perder tempo:
 3.  Roda o pipeline completo de ETL (scraping -> processamento -> importação pro banco).
     
 4.  Te avisa quando terminar.
-    
+
+## Execução Manual 🛠️
+
+Caso prefira executar etapa por etapa para auditoria:
+
+#### 1\. Infraestrutura e Banco de Dados
+
+Inicie o container do PostgreSQL:
+
+``` bash
+docker compose down -v  # Garante limpeza prévia
+docker compose up -d
+
+```
+
+#### 2\. Backend e Pipeline de Dados
+
+Prepare o ambiente Python e popule o banco de dados:
+
+#### Instale as dependências
+
+```bash
+pip install -r requirements.txt
+```
+
+#### Execute o Pipeline de ETL
+
+```bash
+cd src
+python scraping.py      # Download
+python processing.py    # Limpeza
+python transformation.py # Dados Cadastrais
+python join.py          # Junção
+python validation.py    # Regras de Negócio
+python aggregation.py   # Estatísticas
+python import_data.py   # Carga no Banco comSQLAlchemy
+```    
 
 ### 🐍 Preparando o Backend
 
